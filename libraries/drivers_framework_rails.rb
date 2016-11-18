@@ -20,6 +20,11 @@ module Drivers
         rdses.each do |rds|
           database_yml(Drivers::Db::Factory.build(context, app, rds: rds))
         end
+        write_config_files_yml(context, app)
+      end
+
+      def deploy_before_migrate
+        symlink_config_files(context, app)
       end
 
       def deploy_after_restart
@@ -40,6 +45,31 @@ module Drivers
           owner node['deployer']['user'] || 'root'
           group www_group
           variables(database: database, environment: deploy_environment)
+        end
+      end
+
+      def symlink_config_files(context, app)
+        shared_files = JSON.parse((context.node['deploy'][app['shortname']]['shared_files'] || {}).to_json)
+        links = {}
+        release_path = Dir[File.join(deploy_dir(app), 'releases', '*')].sort.last
+        shared_files.each do |key, values|
+          context.link File.join(release_path, 'config', key) do
+            to File.join(deploy_dir(app), 'shared', 'config', key)
+          end
+        end
+      end
+
+      def write_config_files_yml(context, app)
+        shared_files = JSON.parse((context.node['deploy'][app['shortname']]['shared_files'] || {}).to_json)
+        deploy_environment = deploy_env
+        shared_files.each do |key, values|
+          context.template File.join(deploy_dir(app), 'shared', 'config', key) do
+            source 'shared_files.yml.erb'
+            mode '0660'
+            owner node['deployer']['user'] || 'root'
+            group www_group
+            variables(values: values, environment: deploy_environment)
+          end
         end
       end
 

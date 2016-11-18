@@ -1,0 +1,5 @@
+<%=
+  config = {}
+  config[@environment] = @values
+  JSON.parse(config.to_json).to_yaml
+-%>

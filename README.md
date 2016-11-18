@@ -32,3 +32,32 @@ Author: [Igor Rzegocki](https://www.rzegocki.pl/) ([@ajgon](https://github.com/a
 ## License
 
 License: [MIT](http://opsworks-ruby.mit-license.org/)
+
+
+## Rails Shared Files
+The custom JSON to be added should represent the following below:
+
+```
+{
+  "deploy": {
+    "app_name": {
+      "shared_files": {
+        "filename.yml": {
+          "key": "value",
+          "nested_key": {
+            "key": "value"
+          },
+        },
+        "filename2.yml": {
+          "key": "value",
+          "nested_key": {
+            "key": "value"
+          }
+        }
+      }      
+    }
+  }
+}
+```
+
+These files will be created in the shared/config folder then symlink to the release/config folder.
