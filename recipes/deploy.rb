@@ -16,9 +16,10 @@ every_enabled_application do |application|
   appserver = Drivers::Appserver::Factory.build(self, application)
   worker = Drivers::Worker::Factory.build(self, application, databases: databases)
   webserver = Drivers::Webserver::Factory.build(self, application)
+  dns = Drivers::Dns::Factory.build(self, application)
   bundle_env = scm.class.adapter.to_s == 'Chef::Provider::Git' ? { 'GIT_SSH' => scm.out[:ssh_wrapper] } : {}
 
-  fire_hook(:before_deploy, items: databases + [scm, framework, appserver, worker, webserver])
+  fire_hook(:before_deploy, items: databases + [scm, framework, appserver, worker, webserver, dns])
 
   deploy application['shortname'] do
     deploy_to deploy_dir(application)
@@ -52,7 +53,7 @@ every_enabled_application do |application|
       send(scm_key, scm_value) if respond_to?(scm_key)
     end
 
-    [appserver, webserver].each do |server|
+    [appserver, webserver, dns].each do |server|
       server.notifies[:deploy].each do |config|
         notifies config[:action],
                  config[:resource].respond_to?(:call) ? config[:resource].call(application) : config[:resource],
@@ -66,7 +67,7 @@ every_enabled_application do |application|
       perform_bundle_install(shared_path, bundle_env)
 
       fire_hook(
-        :deploy_before_migrate, context: self, items: databases + [scm, framework, appserver, worker, webserver]
+        :deploy_before_migrate, context: self, items: databases + [scm, framework, appserver, worker, webserver, dns]
       )
 
       run_callback_from_file(File.join(release_path, 'deploy', 'before_migrate.rb'))
@@ -76,7 +77,7 @@ every_enabled_application do |application|
       perform_bundle_install(shared_path, bundle_env) unless framework.out[:migrate]
 
       fire_hook(
-        :deploy_before_symlink, context: self, items: databases + [scm, framework, appserver, worker, webserver]
+        :deploy_before_symlink, context: self, items: databases + [scm, framework, appserver, worker, webserver, dns]
       )
 
       run_callback_from_file(File.join(release_path, 'deploy', 'before_symlink.rb'))
@@ -84,7 +85,7 @@ every_enabled_application do |application|
 
     before_restart do
       fire_hook(
-        :deploy_before_restart, context: self, items: databases + [scm, framework, appserver, worker, webserver]
+        :deploy_before_restart, context: self, items: databases + [scm, framework, appserver, worker, webserver, dns]
       )
 
       run_callback_from_file(File.join(release_path, 'deploy', 'before_restart.rb'))
@@ -92,13 +93,13 @@ every_enabled_application do |application|
 
     after_restart do
       fire_hook(
-        :deploy_after_restart, context: self, items: databases + [scm, framework, appserver, worker, webserver]
+        :deploy_after_restart, context: self, items: databases + [scm, framework, appserver, worker, webserver, dns]
       )
 
       run_callback_from_file(File.join(release_path, 'deploy', 'after_restart.rb'))
     end
   end
 
-  fire_hook(:after_deploy, items: databases + [scm, framework, appserver, worker, webserver])
+  fire_hook(:after_deploy, items: databases + [scm, framework, appserver, worker, webserver, dns])
 end
 # rubocop:enable Metrics/BlockLength

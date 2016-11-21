@@ -7,6 +7,7 @@ Cookbooks
 -  `deployer`_
 -  `ruby-ng`_
 -  `nginx (~> 2.7)`_
+-  `route53 (1.1.0)`_
 
 Platform
 --------
@@ -24,3 +25,4 @@ In addition, all recent Debian family distrubutions are assumed to work.
 .. _deployer: https://supermarket.chef.io/cookbooks/deployer
 .. _ruby-ng: https://supermarket.chef.io/cookbooks/ruby-ng
 .. _nginx (~> 2.7): https://supermarket.chef.io/cookbooks/nginx
+.. _route53 (1.1.0): https://supermarket.chef.io/cookbooks/route53

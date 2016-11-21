@@ -10,6 +10,7 @@ version '1.2.0'
 depends 'deployer'
 depends 'ruby-ng'
 depends 'nginx', '~> 2.7'
+depends 'route53'
 
 supports 'amazon', '>= 2015.03'
 supports 'ubuntu', '>= 12.04'

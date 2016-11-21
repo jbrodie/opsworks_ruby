@@ -126,3 +126,11 @@ default['defaults']['worker']['config'] = { 'concurrency' => 5, 'verbose' => fal
 
 default['defaults']['worker']['queues'] = '*'
 default['defaults']['worker']['workers'] = 2
+
+## dns
+default['defaults']['dns']['adapter'] = 'null'
+
+## route53
+# default['defaults']['dns']['instance_id'] = ''
+# default['defaults']['dns']['zone_id'] = ''
+# default['defaults']['dns']['zone_id'] = ''
