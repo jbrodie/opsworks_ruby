@@ -25,6 +25,9 @@ every_enabled_application do |application|
   appserver = Drivers::Appserver::Factory.build(self, application, databases: databases)
   worker = Drivers::Worker::Factory.build(self, application, databases: databases)
   webserver = Drivers::Webserver::Factory.build(self, application)
-
-  fire_hook(:configure, items: databases + [scm, framework, appserver, worker, webserver])
+  dns = Drivers::Dns::Factory.build(self, application)
+  Chef::Log.warn(' ---------------------------- STARTING CONFIGURE HOOK -----------------------------')
+  Chef::Log.warn("#{application}")
+  fire_hook(:configure, items: databases + [scm, framework, appserver, worker, webserver, dns])
+  Chef::Log.warn(' ---------------------------- END CONFIGURE HOOK -----------------------------')
 end

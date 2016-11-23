@@ -5,10 +5,24 @@ module Drivers
 
       adapter :route53
       allowed_engines :route53
-      output filter: [:config, :process_count, :require, :syslog]
+      output filter: []
+
+      def out
+        super
+        Chef::Log.warn(' SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!! ')
+      end
+
+      def configure
+        dns = Drivers::Dns::Factory.build(context, app)
+        dns.out
+        add_update_dns(dns)
+      end
+
 
       def after_deploy
-        add_update_dns(Drivers::Dns::Factory.build(context, app))
+        dns = Drivers::Dns::Factory.build(context, app)
+        dns.out
+        add_update_dns(dns)
       end
 
       def after_undeploy
@@ -16,56 +30,32 @@ module Drivers
       end
 
       def setup
-
-        Chef::Log.warn('************************************************* END OF DNS SETUP')
+        dns.out
       end
 
       private
 
       def remove_dns
-        Chef::Log.warn('************************************************* REMOVE DNS - AFTER UN DEPLOY')
+        context.include_recipe("route53::undeploy")
       end
 
       def add_update_dns(dns)
-        context.include_recipe("route53")
-        Chef::Log.warn('************************************************* ADD DNS - AFTER DEPLOY')
-        context.node.each do |k,v|
-          Chef::Log.warn("#{k}")
-          Chef::Log.warn("#{v}")
-        end
-        # Chef::Log.warn("#{context.node["opsworks"]["instance"]["id"]}")
-        # include_recipe "route53"
-
+        # context.include_recipe("route53::deploy")
         context.route53_record "create a record" do
-          name  context.node["deploy"]["global"]["domain"]
-          value context.node["ec2"]["public_hostname"]
+          name  node[:defaults][:dns][:domain] #{}"qqqqq.itrgdev.com"
+          value node[:cloud][:public_hostname]
           type  "CNAME"
 
           # The following are for routing policies
-          # weight "1"
-          # set_identifier "my-instance-id"
-          # zone_id               node[:route53][:zone_id]
-          # aws_access_key_id     node[:route53][:aws_access_key_id]
-          # aws_secret_access_key node[:route53][:aws_secret_access_key]
-          # overwrite true
-          # action :create
+          # weight "1" (optional)
+          # set_identifier "my-instance-id" (optional-must be unique)
+          zone_id               node[:route53][:zone_id] # "Z1PRUJSS4U83X0" #
+          aws_access_key_id     node[:route53][:aws_access_key_id] # "AKIAIY4N3UZOHIZFSLJQ" #
+          aws_secret_access_key node[:route53][:aws_secret_access_key] #"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" #
+          overwrite true
+          action :create
         end
-
       end
-
-      # def add_sidekiq_config
-      #   deploy_to = deploy_dir(app)
-      #   config = configuration
-      #
-      #   (1..process_count).each do |process_number|
-      #     context.template File.join(deploy_to, File.join('shared', 'config', "sidekiq_#{process_number}.yml")) do
-      #       owner node['deployer']['user']
-      #       group www_group
-      #       source 'sidekiq.conf.yml.erb'
-      #       variables config: config
-      #     end
-      #   end
-      # end
     end
   end
 end
