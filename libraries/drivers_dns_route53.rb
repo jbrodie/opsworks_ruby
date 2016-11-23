@@ -9,7 +9,6 @@ module Drivers
 
       def out
         super
-        Chef::Log.warn(' SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!!  SUPER CALLED!!! ')
       end
 
       def configure
